@@ -1,0 +1,57 @@
+public class trgController
+{
+    public static void trgMethod(List<Opportunity> newList,Map<Id,Opportunity> oldMap)
+    {
+        Set<Id> accIds = new Set<Id>();
+        
+        for(Opportunity newOp : newList)
+        {
+            if(oldMap != null)
+            {
+                Opportunity oldOp = oldMap.get(newOp.Id);
+                if(oldOp.AccountId != newOp.AccountId)
+                {
+                    accIds.add(oldOp.AccountId);
+                    accIds.add(newOp.AccountId);
+                }
+                else
+                {
+                    accIds.add(newOp.AccountId);
+                }
+            }
+            else
+            {
+                accIds.add(newOp.AccountId);
+            }
+        }
+        
+        Map<Id,Account> accMap = new Map<Id,Account>([Select Id,Rating from Account where Id IN : accIds]);
+        List<Account> accList = new List<Account>();
+        List<Opportunity> oppList = [Select Id,Stagename,AccountId from Opportunity where AccountId IN : accIds];
+        
+        if(oppList.size() > 0)
+        {
+            for(Opportunity op : oppList)
+            {
+                if(op.Stagename == 'Closed Won')
+                {
+                    Account acct = accMap.get(op.AccountId);
+                    acct.Rating = 'Warm';
+                    accList.add(acct);
+                }
+                
+            }
+        }
+        else 
+        {
+            for(Id ids : accIds)
+            {
+                Account a = new Account();
+                a.Id = ids;
+                a.Rating = '';
+                accList.add(a);
+            }
+        }
+        update accList;
+    }
+}
