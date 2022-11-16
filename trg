@@ -30,3 +30,21 @@ trigger trg3 on Opportunity (after insert,after Update)
         update acctMap.values();
     }
 }
+
+
+
+trigger trg3 on Opportunity(after Insert,after Delete,after Update,after Undelete)
+{
+    if(trigger.isAfter && (trigger.isInsert || trigger.isUndelete))
+    {
+        trgController.trgMethod(trigger.new,null);
+    }
+    else if(trigger.isAfter && trigger.isDelete)
+    {
+        trgController.trgMethod(trigger.old,null);
+    }
+    else if(trigger.isAfter && trigger.isUpdate)
+    {
+        trgController.trgMethod(trigger.new,trigger.oldMap);
+    }
+}
