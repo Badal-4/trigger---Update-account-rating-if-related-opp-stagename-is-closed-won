@@ -1,3 +1,4 @@
+
 public class trgController
 {
     public static void trgMethod(List<Opportunity> newList,Map<Id,Opportunity> oldMap)
@@ -26,7 +27,7 @@ public class trgController
         }
         
         Map<Id,Account> accMap = new Map<Id,Account>([Select Id,Rating from Account where Id IN : accIds]);
-        List<Account> accList = new List<Account>();
+        Map<Id,Account> acctMap = new Map<Id,Account>();
         List<Opportunity> oppList = [Select Id,Stagename,AccountId from Opportunity where AccountId IN : accIds];
         
         if(oppList.size() > 0)
@@ -36,8 +37,8 @@ public class trgController
                 if(op.Stagename == 'Closed Won')
                 {
                     Account acct = accMap.get(op.AccountId);
-                    acct.Rating = 'Warm';
-                    accList.add(acct);
+                    acct.Rating = 'Cold';
+                    acctMap.put(acct.Id,acct);
                 }
                 
             }
@@ -48,10 +49,10 @@ public class trgController
             {
                 Account a = new Account();
                 a.Id = ids;
-                a.Rating = '';
-                accList.add(a);
+                a.Rating = 'Hot';
+                acctMap.put(a.Id,a);
             }
         }
-        update accList;
+        update acctMap.values();
     }
 }
